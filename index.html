@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Brown Birdie 2022</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<style>
+			* {
+				box-sizing: border-box;
+			}
+			body {
+				padding: 0;
+				margin: 0;
+				color: hsl(30, 100%, 95%);
+				background: hsl(30, 100%, 10%);
+				font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen, Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+			}
+			a {
+				color: hsl(30, 100%, 95%);
+			}
+			input, textarea {
+				appearance: none;
+				border: 0;
+				color: hsl(30, 100%, 95%);
+				background: hsl(30, 100%, 12%);
+				width: 100%;
+				padding: .5rem;
+				resize: vertical;
+			}
+			input[type=submit] {
+				text-transform: uppercase;
+				font-size: 1em;
+			}
+			input[type=submit]:hover {
+				background: hsl(30, 100%, 14%);
+			}
+			form label {
+				padding: .3rem 0;
+				display: inline-block;
+			}
+			#spinner {
+				margin-left: auto;
+				margin-right: auto;
+				width: 50px;
+				aspect-ratio: 1;
+				border-radius: 50%;
+				border: 8px solid;
+				border-color: hsl(30, 100%, 95%) #0000;
+				animation: s1 1s infinite;
+			}
+			@keyframes s1 {to{transform: rotate(.5turn)}}
+			
+		</style>
+		<script type="text/javascript">
+			window.onload = function() {
+				fetch('https://brownbirdie.azurewebsites.net/api/visitors')
+				.then((response) => response.json())
+				.then((data) => data.forEach((visitor) =>
+				{
+					let e = document.createElement('li');
+					e.textContent = visitor;
+
+					document
+						.getElementById('visitors')
+						.appendChild(e);
+				}))
+				.then(() => document.getElementById('spinner').remove());
+
+				document
+				.getElementById('form')
+				.onsubmit = function(event) {
+					event.preventDefault();
+
+					let request = {};
+					new FormData(event.target).forEach((value, key) => request[key] = value);
+					fetch('https://brownbirdie.azurewebsites.net/api/register', {
+						method: 'POST',
+						body: JSON.stringify(request),
+					})
+					.then((response) => location.reload(),
+						(error) => alert("Registration failed: " + error)
+					);
+				};
+			};
+		</script>
+	</head>
+	<body>
+		<main style="max-width: 480pt; margin-left: auto; margin-right: auto; padding: 2rem; display: flex; flex: 1 1; flex-direction: column;">
+			<img class="logo" src="birb.png" alt="Brown Birdie">
+			<section style="text-align: center;">
+				<h1 style="margin-bottom: 0;">2&ndash;4 December 2022</h1>
+				<address style="font-size: 0.7rem;">
+					Questions? <a href="mailto:boa-cameras-0d@icloud.com?subject=Brown Birdie">boa-cameras-0d@icloud.com</a>
+				</address>
+				<div style="padding-top: 1rem;"><a href="2022.ics" rel="Calendar Event">Add to calendar</a></div>
+			</section>
+
+			<section>
+				<h1>Visitors</h1>
+				<div id="spinner"></div>
+				<ol id="visitors">
+				</ol>
+			</section>
+
+			<section>
+				<h1>Register</h1>
+				<form id="form">
+					<label for="nick">Nick</label>
+					<input type="text" id="nick" name="nick" maxlength="30" required>
+					<label for="group">Group (optional)</label>
+					<input type="text" id="group" name="group" maxlength="30">
+					<label for="email">Email (optional, kept private)</label>
+					<input type="email" id="email" name="email" maxlength="320">
+					<label for="extra">Additional info (optional, kept private)</label>
+					<textarea id="extra" name="extra" maxlength="1024" rows="3" placeholder="Allergies, questions, requests, etc."></textarea>
+					<input type="submit" value="Register">
+				</form>
+			</section>
+		</main>
+	</body>
+</html>
