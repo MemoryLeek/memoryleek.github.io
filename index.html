@@ -1,108 +1,240 @@
 <!DOCTYPE html>
 <html>
-	<head>
-		<meta charset="utf-8">
-		<title>Brown Birdie 2022</title>
-		<meta name="viewport" content="width=device-width, initial-scale=1">
-		<style>
-			* {
-				box-sizing: border-box;
-			}
-			body {
-				padding: 0;
-				margin: 0;
-				color: hsl(30, 100%, 95%);
-				background: hsl(30, 100%, 10%);
-				font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen, Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
-			}
-			a {
-				color: hsl(30, 100%, 95%);
-			}
-			input, textarea {
-				appearance: none;
-				border: 0;
-				color: hsl(30, 100%, 95%);
-				background: hsl(30, 100%, 12%);
-				width: 100%;
-				padding: .5rem;
-				resize: vertical;
-			}
-			input[type=submit] {
-				text-transform: uppercase;
-				font-size: 1em;
-			}
-			input[type=submit]:hover {
-				background: hsl(30, 100%, 14%);
-			}
-			form label {
-				padding: .3rem 0;
-				display: inline-block;
-			}
-			#spinner {
-				margin-left: auto;
-				margin-right: auto;
-				width: 50px;
-				aspect-ratio: 1;
-				border-radius: 50%;
-				border: 8px solid;
-				border-color: hsl(30, 100%, 95%) #0000;
-				animation: s1 1s infinite;
-			}
-			@keyframes s1 {to{transform: rotate(.5turn)}}
-			
-		</style>
-		<script type="text/javascript">
-			window.onload = function() {
-				fetch('https://brownbirdie.azurewebsites.net/api/visitors')
-				.then((response) => response.json())
-				.then((data) => data.forEach((visitor) =>
-				{
-					let e = document.createElement('li');
-					e.textContent = visitor;
 
-					document
-						.getElementById('visitors')
-						.appendChild(e);
-				}))
-				.then(() => document.getElementById('spinner').remove());
+<head>
+	<meta charset="utf-8">
+	<title>Brown Birdie 2023</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<style>
+		* {
+			box-sizing: border-box;
+		}
 
+		:root {
+			--main-bg-color: hsl(30, 100%, 10%);
+			--field-bg-color: hsl(30, 100%, 12%);
+			--main-fg-color: hsl(30, 100%, 95%);
+			--main-highlight: brightness(120%);
+		}
+
+		@media (prefers-color-scheme: light) {
+			:root {
+				--main-bg-color: hsl(30, 100%, 90%);
+				--field-bg-color: hsl(30, 100%, 93%);
+				--main-fg-color: hsl(30, 100%, 10%);
+				--main-highlight: brightness(105%);
+			}
+		}
+
+		body {
+			padding: 0;
+			margin: 0;
+			color: var(--main-fg-color);
+			background: var(--main-bg-color);
+			font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen, Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+		}
+
+		a {
+			color: var(--main-fg-color);
+		}
+
+		ul,
+		ol {
+			padding: 0;
+			list-style-position: inside;
+		}
+
+		ul>li {
+			padding: 0.2em 0;
+		}
+
+		input,
+		textarea {
+			appearance: none;
+			border: 0;
+			color: var(--main-fg-color);
+			background: var(--field-bg-color);
+			width: 100%;
+			padding: .5rem;
+			resize: vertical;
+		}
+
+		input[type=submit] {
+			text-transform: uppercase;
+			font-size: 1em;
+		}
+
+		input[type=submit]:hover {
+			filter: var(--main-highlight);
+		}
+
+		form label {
+			padding: .3rem 0;
+			display: inline-block;
+		}
+
+		main {
+			margin-left: auto;
+			margin-right: auto;
+			padding: 2rem;
+			display: flex;
+			flex: 1 1;
+			flex-direction: column;
+		}
+
+		.error {
+			color: #f55;
+		}
+
+		.logo {
+			max-width: min(360px, 100%);
+		}
+
+		.rules {
+			padding-left: 2em;
+			font-style: italic;
+			font-size: 0.7em;
+		}
+
+		#spinner {
+			margin-left: auto;
+			margin-right: auto;
+			width: 50px;
+			aspect-ratio: 1;
+			border-radius: 50%;
+			border: 8px solid;
+			border-color: var(--main-fg-color) #0000;
+			animation: s1 1s infinite;
+		}
+
+		article>h1 {
+			padding-bottom: 0.2em;
+			border-bottom: 1px solid var(--main-fg-color);
+		}
+
+		@media (min-width: 640px) {
+			main {
+				max-width: 960px;
+			}
+
+			.cards {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 1em;
+			}
+
+			.cards>article {
+				flex: 1 1;
+				min-width: 200px;
+			}
+		}
+
+		@keyframes s1 {
+			to {
+				transform: rotate(.5turn)
+			}
+		}
+	</style>
+	<script type="text/javascript">
+		async function loadVisitors() {
+			try {
+				const list = document.getElementById('visitors');
+				if (!document.getElementById('spinner')) {
+					const spinner = document.createElement('div');
+					spinner.id = 'spinner';
+					list.innerHTML = '';
+					list.parentNode.insertBefore(spinner, list);
+				}
+
+				const response = await fetch('https://api.memoryleek.com/visitors');
+				const visitors = await response.json();
+				for (const visitor of visitors) {
+					const e = document.createElement('li');
+					e.textContent = visitor.group
+						? `${visitor.nick} / ${visitor.group}`
+						: visitor.nick;
+					list.appendChild(e);
+				}
+				document.getElementById('spinner').remove();
+			} catch (error) {
+				const e = document.createElement('p');
+				e.className = 'error';
+				e.textContent = `ERROR: ${error.message}`;
 				document
+					.getElementById('spinner')
+					.replaceWith(e);
+			}
+		}
+
+		window.onload = async function () {
+			loadVisitors();
+			document
 				.getElementById('form')
-				.onsubmit = function(event) {
+				.onsubmit = async function (event) {
 					event.preventDefault();
 
-					let request = {};
-					new FormData(event.target).forEach((value, key) => request[key] = value);
-					fetch('https://brownbirdie.azurewebsites.net/api/register', {
-						method: 'POST',
-						body: JSON.stringify(request),
-					})
-					.then((response) => location.reload(),
-						(error) => alert("Registration failed: " + error)
-					);
-				};
-			};
-		</script>
-	</head>
-	<body>
-		<main style="max-width: 480pt; margin-left: auto; margin-right: auto; padding: 2rem; display: flex; flex: 1 1; flex-direction: column;">
-			<img class="logo" src="birb.png" alt="Brown Birdie">
-			<section style="text-align: center;">
-				<h1 style="margin-bottom: 0;">2&ndash;4 December 2022</h1>
-				<address style="font-size: 0.7rem;">
-					Questions? <a href="mailto:boa-cameras-0d@icloud.com?subject=Brown Birdie">boa-cameras-0d@icloud.com</a>
-				</address>
-				<div style="padding-top: 1rem;"><a href="2022.ics" rel="Calendar Event">Add to calendar</a></div>
-			</section>
+					try {
+						const request = {};
+						new FormData(event.target).forEach((value, key) => request[key] = value);
+						const response = await fetch('https://api.memoryleek.com/register', {
+							headers: {
+								"Content-Type": "application/json",
+							},
+							method: 'POST',
+							body: JSON.stringify(request),
+						});
 
-			<section>
+						if (!response.ok) {
+							const contentType = response.headers.get("content-type");
+							if (contentType && contentType.indexOf("application/json") !== -1) {
+								const content = await response.json();
+								throw new Error(content.error || response.statusText);
+							} else {
+								throw new Error(response.statusText);
+							}
+						}
+
+						loadVisitors();
+					} catch (error) {
+						let e = document.getElementById('form').querySelector('.error');
+						if (!e) {
+							e = document.createElement('p');
+							e.className = "error";
+							document
+								.getElementById('form')
+								.appendChild(e);
+						}
+
+						e.textContent = `ERROR: ${error.message}`;
+					}
+				}
+		};
+	</script>
+</head>
+
+<body>
+	<main>
+		<section style="text-align: center;">
+			<img class="logo" src="birb.png" alt="Brown Birdie">
+		</section>
+		<section style="text-align: center;">
+			<h1 style="font-size: 2.2em; margin: 0;">Brown Birdie</h1>
+			<h2 style="margin: 0;">6 &ndash; 8 October 2023</h2>
+			<address style="margin-top: 0.5em; font-size: 0.7rem;">
+				Questions? <a href="mailto:boa-cameras-0d@icloud.com?subject=Brown Birdie">boa-cameras-0d@icloud.com</a>
+			</address>
+			<div style="padding-top: 1rem;"><a href="2023.ics" rel="Calendar Event">Add to calendar</a></div>
+		</section>
+
+		<section class="cards">
+			<article>
 				<h1>Visitors</h1>
 				<div id="spinner"></div>
 				<ol id="visitors">
 				</ol>
-			</section>
+			</article>
 
-			<section>
+			<article>
 				<h1>Register</h1>
 				<form id="form">
 					<label for="nick">Nick</label>
@@ -112,10 +244,69 @@
 					<label for="email">Email (optional, kept private)</label>
 					<input type="email" id="email" name="email" maxlength="320">
 					<label for="extra">Additional info (optional, kept private)</label>
-					<textarea id="extra" name="extra" maxlength="1024" rows="3" placeholder="Allergies, questions, requests, etc."></textarea>
+					<textarea id="extra" name="extra" maxlength="1024" rows="3"
+						placeholder="Allergies, questions, requests, etc."></textarea>
 					<input type="submit" value="Register">
 				</form>
-			</section>
-		</main>
-	</body>
+			</article>
+		</section>
+
+		<section class="cards">
+			<article>
+				<h1>Compos</h1>
+				<ul>
+					<li>
+						Animation / Video
+						<ul class="rules">
+							<li>Max play time 8 minutes</li>
+						</ul>
+					</li>
+					<li>
+						Demo
+						<ul class="rules">
+							<li>Combined oldschool and newschool</div>
+							<li>No size limit, but size will be presented on the slides</div>
+							<li>Max play time 8 minutes</div>
+						</ul>
+					</li>
+					<li>Graphics</li>
+					<li>Photo</li>
+					<li>
+						Streaming music
+						<ul class="rules">
+							<li>Max play time 4 minutes</li>
+						</ul>
+					</li>
+					<li>
+						Tracked music
+						<ul class="rules">
+							<li>Max play time 4 minutes</li>
+						</ul>
+					</li>
+					<li>
+						Wild
+						<ul class="rules">
+							<li>Anything that doesn't fit the other categories</li>
+						</ul>
+					</li>
+				</ul>
+				<p>As is tradition there will also be multiple fast compos announced during the party.</p>
+			</article>
+
+			<article>
+				<h1>Compo PC</h1>
+				<ul>
+					<li>AMD Ryzen 7 3700X</li>
+					<li>32GB 3200 MT/s</li>
+					<li>GeForce RTX 2080 Super 8GB</li>
+					<li>Windows 11 22H2</li>
+				</ul>
+
+				<p>Linux demos are OK as well, but they will be capped and played back to avoid waiting for reboots.</p>
+				<p>Oldschool demos will be played in emulators.</p>
+			</article>
+		</section>
+	</main>
+</body>
+
 </html>
