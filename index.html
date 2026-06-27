@@ -166,19 +166,6 @@
 			}
 		}
 
-		async function calculateNonce(nick, difficulty) {
-			let hash;
-			let nonce = 0;
-			let searchString = '0'.repeat(difficulty);
-			do {
-				const data = new TextEncoder().encode(nick + ++nonce);
-				const hashBuffer = await window.crypto.subtle.digest('SHA-256', data);
-				const hashArray = Array.from(new Uint8Array(hashBuffer));
-				hash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-			} while (!hash.startsWith(searchString));
-			return nonce.toString();
-		}
-
 		window.onload = async function () {
 			loadVisitors();
 			document
@@ -187,12 +174,7 @@
 					event.preventDefault();
 
 					try {
-						let submitButton = document.getElementById('form').querySelector('[type=submit]');
-						submitButton.disabled = true;
-						submitButton.value = "Making sure you're human...";
-
 						const request = {};
-						request.nonce = await calculateNonce(event.target.nick.value, 4);
 						new FormData(event.target).forEach((value, key) => request[key] = value);
 						const response = await fetch('https://api.memoryleek.com/register', {
 							headers: {
@@ -202,9 +184,6 @@
 							body: JSON.stringify(request),
 						});
 
-						submitButton.disabled = false;
-						submitButton.value = "Register";
-
 						if (!response.ok) {
 							const contentType = response.headers.get("content-type");
 							if (contentType && contentType.indexOf("application/json") !== -1) {
@@ -213,8 +192,6 @@
 							} else {
 								throw new Error(response.statusText);
 							}
-						} else {
-							event.target.reset();
 						}
 
 						loadVisitors();
