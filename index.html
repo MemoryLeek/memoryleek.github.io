@@ -138,6 +138,37 @@
                 border-bottom: 1px solid var(--main-fg-color);
             }
 
+            #countdown {
+                display: flex;
+                justify-content: center;
+                gap: 0.6em;
+                margin-top: 0.4em;
+                visibility: hidden;
+            }
+
+            #countdown.ready {
+                visibility: visible;
+            }
+
+            #countdown .cd-unit {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                min-width: 3ch;
+            }
+
+            #countdown .cd-value {
+                font-variant-numeric: tabular-nums;
+                font-size: 1.2em;
+                line-height: 1;
+            }
+
+            #countdown .cd-label {
+                font-size: 0.6em;
+                text-transform: uppercase;
+                opacity: 0.75;
+            }
+
             @media (min-width: 640px) {
                 main {
                     max-width: 960px;
@@ -161,6 +192,13 @@
                 }
             }
         </style>
+        <noscript>
+            <style>
+                #countdown {
+                    display: none;
+                }
+            </style>
+        </noscript>
         <script src="https://cdn.jsdelivr.net/npm/@cap.js/widget@0.1.56"></script>
         <script type="text/javascript">
             async function loadVisitors() {
@@ -206,6 +244,63 @@
                     .getElementById("form")
                     .querySelector("[type=submit]").disabled = !enabled;
             }
+
+            const EVENT_START = Date.parse("2026-10-23T17:00:00+02:00");
+            const EVENT_END = Date.parse("2026-10-25T12:00:00+01:00");
+
+            function setCountdownUnit(id, value) {
+                document.getElementById(id).textContent =
+                    String(value).padStart(2, "0");
+            }
+
+            let countdownInterval = null;
+
+            function updateCountdown() {
+                const now = Date.now();
+                const el = document.getElementById("countdown");
+                if (!el) return;
+
+                if (now >= EVENT_END) {
+                    el.style.display = "none";
+                    if (countdownInterval) {
+                        clearInterval(countdownInterval);
+                        countdownInterval = null;
+                    }
+                    return;
+                }
+
+                if (now >= EVENT_START) {
+                    if (!el.querySelector(".cd-message")) {
+                        const msg = document.createElement("div");
+                        msg.className = "cd-message";
+                        msg.textContent = "The party is on!";
+                        el.replaceChildren(msg);
+                        el.setAttribute("aria-label", "The party is on!");
+                        el.classList.add("ready");
+                    }
+                    return;
+                }
+
+                const diff = EVENT_START - now;
+                setCountdownUnit("cd-d", Math.floor(diff / 86400000));
+                setCountdownUnit(
+                    "cd-h",
+                    Math.floor((diff % 86400000) / 3600000),
+                );
+                setCountdownUnit("cd-m", Math.floor((diff % 3600000) / 60000));
+                setCountdownUnit("cd-s", Math.floor((diff % 60000) / 1000));
+                el.classList.add("ready");
+            }
+
+            function startCountdown() {
+                updateCountdown();
+                if (!countdownInterval && Date.now() < EVENT_END) {
+                    countdownInterval = setInterval(updateCountdown, 1000);
+                }
+            }
+
+            document.addEventListener("DOMContentLoaded", startCountdown);
+            document.addEventListener("visibilitychange", updateCountdown);
 
             window.onload = async function () {
                 loadVisitors();
@@ -301,6 +396,28 @@
             <section style="text-align: center">
                 <h1 style="font-size: 2.2em; margin: 0">Brown Birdie</h1>
                 <h2 style="margin: 0">23 &ndash; 25 October 2026</h2>
+                <div
+                    id="countdown"
+                    role="timer"
+                    aria-label="Time until Brown Birdie starts"
+                >
+                    <div class="cd-unit">
+                        <span class="cd-value" id="cd-d">00</span>
+                        <span class="cd-label">days</span>
+                    </div>
+                    <div class="cd-unit">
+                        <span class="cd-value" id="cd-h">00</span>
+                        <span class="cd-label">hours</span>
+                    </div>
+                    <div class="cd-unit">
+                        <span class="cd-value" id="cd-m">00</span>
+                        <span class="cd-label">mins</span>
+                    </div>
+                    <div class="cd-unit">
+                        <span class="cd-value" id="cd-s">00</span>
+                        <span class="cd-label">secs</span>
+                    </div>
+                </div>
                 <address style="margin-top: 0.5em; font-size: 0.7rem">
                     Questions?
                     <a
